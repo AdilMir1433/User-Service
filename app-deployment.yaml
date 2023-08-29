@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  selector:
+    matchLabels:
+      app: springboot-k8s-mysql
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: springboot-k8s-mysql
+    spec:
+      containers:
+        - name: user-service
+          image: adilmir22/user-service:latest
+          ports:
+            - containerPort: 8081
+          env:   # Setting Enviornmental Variables
+            - name: DB_HOST   # Setting Database host address from configMap
+              value: postgres
+            - name: DB_NAME  # Setting Database name from configMap
+              value: Online_Exam_System
+            - name: DB_USERNAME  # Setting Database username from Secret
+              value: postgres
+            - name: DB_PASSWORD # Setting Database password from Secret
+              value: "123456"
+
+---
+
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind we are creating
+metadata: # Metadata of the resource kind we are creating
+  name: springboot-crud-svc
+spec:
+  selector:
+    app: springboot-k8s-mysql
+  ports:
+    - protocol: "TCP"
+      port: 8081 # The port that the service is running on in the cluster
+      targetPort: 8081 # The port exposed by the service
+  type: NodePort # type of the service.
